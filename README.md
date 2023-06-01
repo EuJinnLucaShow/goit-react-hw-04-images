@@ -16,19 +16,19 @@
 
 - Створений репозиторій `goit-react-hw-04-hooks-feedback`.
 - Проведи рефакторинг коду завдання
-  [Віджет відгуків](../homework-02/feedback/README.md), використовуючи
+  [Віджет відгуків](https://github.com/EuJinnLucaShow/goit-react-hw-02-feedback/blob/main/README.md), використовуючи
   React-хуки.
 
 ## Книга контактів
 
 - Створений репозиторій `goit-react-hw-04-hooks-phonebook`.
 - Проведи рефакторинг коду завдання
-  [Книга контактів](../homework-03/phonebook/README.md), використовуючи
+  [Книга контактів](https://github.com/EuJinnLucaShow/goit-react-hw-03-phonebook/blob/main/README.md), використовуючи
   React-хуки.
 
 ## Пошук зображень
 
 - Створений репозиторій `goit-react-hw-04-hooks-images`.
 - Проведи рефакторинг коду завдання
-  [Пошук зображень](../homework-03/image-finder/README.md), використовуючи
+  [Пошук зображень](https://github.com/EuJinnLucaShow/goit-react-hw-03-image-finder/blob/main/README.md), використовуючи
   React-хуки.
