@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
@@ -9,106 +9,100 @@ import { AppDiv } from './App.syled';
 import { ToastContainer, toast, Flip } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-class App extends Component {
-  state = {
-    images: [],
-    isLoading: false,
-    error: null,
-    query: '',
-    page: 1,
-    showModal: false,
-    selectedImage: null,
-    isLastPage: false,
-  };
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isLastPage, setIsLastPage] = useState(false);
 
-componentDidUpdate(_prevProps, prevState) { 
-  if (prevState.query !== this.state.query) {       
-      this.setState({ images: [], page: 1, isLastPage: false }, () => {
-  this.fetchImages();
-});
-    }  
-}
-
-  fetchImages = () => {
-    const { query, page } = this.state;
-    const API_KEY = '34187261-edb3bdfe414ee3b7adebeccc5';
-
-    this.setState({ isLoading: true });
-
-    axios
-      .get(
-        `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-      .then(response => {
-        const { hits, totalHits } = response.data;
-
-        if (hits.length === 0) { 
-        return toast('Sorry, there are no images matching your request...', {position: toast.POSITION.TOP_CENTER, icon: "🤔"});
-        }
-
-        const modifiedHits = hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
-      id,
-      tags,
-      webformatURL,
-      largeImageURL
-    }));
-
-        this.setState(prevState => ({
-          images: [...prevState.images, ...modifiedHits],
-          page: prevState.page + 1,
-          isLastPage: prevState.images.length + modifiedHits.length >= totalHits,
-        }));
-      })
-      .catch(error => {
-        this.setState({ error: error.message });
-      })
-      .finally(() => {
-        this.setState({ isLoading: false });
-      });
-  };
-
-  handleSearchSubmit = query => {
-      if (this.state.query === query) {
+  useEffect(() => {
+    if (query === '') {
       return;
     }
-  this.setState({ query: query, page: 1, images: [], error: null, isLastPage: false });
+    setImages([]);
+    setPage(1);
+    setIsLastPage(false);
+    fetchImages();  
+  }, [query])
+
+   
+   async function fetchImages() {
+    const API_KEY = '34187261-edb3bdfe414ee3b7adebeccc5';
+
+    setIsLoading(true);
+    
+    try {
+      await axios
+        .get(
+          `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
+        )
+        .then(response => {
+          const { hits, totalHits } = response.data;
+
+          if (hits.length === 0) {            
+            toast('Sorry, there are no images matching your request...', {
+              position: toast.POSITION.TOP_CENTER,
+              icon: '🤔'
+            });           
+          }
+
+          const modifiedHits = hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
+            id,
+            tags,
+            webformatURL,
+            largeImageURL
+          }));
+
+          setImages(prevImages => [...prevImages, ...modifiedHits]);
+          setPage(prevPage => prevPage + 1);
+          setIsLastPage(images.length + modifiedHits.length >= totalHits);
+        })
+     } catch (error) {
+    setError(error.message);
+  } finally {
+    setIsLoading(false);
+  }
 };
 
-  handleImageClick = image => {
-    this.setState({ selectedImage: image, showModal: true });
+  const handleSearchSubmit = newQuery => {
+    if (query === newQuery) {
+      return;
+    }
+    setQuery(newQuery);
+  };
+
+  const handleImageClick = image => {
+    setSelectedImage(image);
+    setShowModal(true);
     document.body.style.overflow = 'hidden';
   };
 
-  handleModalClose = () => {
-    this.setState({ selectedImage: null, showModal: false });
+  const handleModalClose = () => {
+    setSelectedImage(null);
+    setShowModal(false);
     document.body.style.overflow = 'auto';
   };
 
-  render() {
-    const { images, isLoading, error, showModal, selectedImage, isLastPage } = this.state;
+  return (
+    <AppDiv>
+      <ToastContainer transition={Flip} />
+      <Searchbar onSubmit={handleSearchSubmit} />
 
-    return (
-      <AppDiv>
-        <ToastContainer transition={Flip}/>
-        <Searchbar onSubmit={this.handleSearchSubmit} />
+      {error && <p>Error: {error}</p>}
 
-        {error && <p>Error: {error}</p>}
+      <ImageGallery images={images} onItemClick={handleImageClick} />
 
-        <ImageGallery images={images} onItemClick={this.handleImageClick} />
+      {isLoading && <Loader />}
 
-        {isLoading && <Loader />}
-        
+      {!isLoading && images.length > 0 && !isLastPage && <Button onClick={fetchImages} />}
 
-        {!isLoading && images.length > 0 && !isLastPage && (
-          <Button onClick={this.fetchImages} />
-        )}
-
-        {showModal && (
-          <Modal image={selectedImage} onClose={this.handleModalClose} />
-        )}
-      </AppDiv>
-    );
-  }
-}
+      {showModal && <Modal image={selectedImage} onClose={handleModalClose} />}
+    </AppDiv>
+  );
+};
 
 export default App;
