@@ -27,6 +27,7 @@ const App = () => {
     setPage(1);
     setIsLastPage(false);
     fetchImages();  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query])
 
    
