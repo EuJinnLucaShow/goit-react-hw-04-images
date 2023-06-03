@@ -50,7 +50,7 @@ async function getImages() {
           position: toast.POSITION.TOP_CENTER,
           icon: '🤔',
         });
-        return        
+        return setQuery('')
       }
 
       const modifiedHits = responseImages.hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
