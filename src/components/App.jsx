@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchImages } from './ServerRequest/ServerRequest';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 import Modal from './Modal/Modal';
 import Loader from './Loader/Loader';
-import { AppDiv } from './App.syled';
+import { AppDiv } from './App.styled';
 import { ToastContainer, toast, Flip } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,65 +15,71 @@ const App = () => {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(1);  
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isLastPage, setIsLastPage] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+
+
+useEffect(() => {
+ getImages();
+async function getImages() {
+      try {
+        setIsLoading(true);
+        const responseImages = await fetchImages('', 1);
+        setImages([...responseImages.hits]);
+        setTotal(responseImages.total);       
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    if (query === '') {
-      return;
-    }
-    setImages([]);
-    setPage(1);
-    setIsLastPage(false);
-    fetchImages();  
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query])
-
-   
-   async function fetchImages() {
-    const API_KEY = '34187261-edb3bdfe414ee3b7adebeccc5';
-
-    setIsLoading(true);
-    
+    if (query) getImages();
+  async function getImages() {
     try {
-      await axios
-        .get(
-          `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
-        )
-        .then(response => {
-          const { hits, totalHits } = response.data;
+      setShowButton(true);
+      setIsLoading(true);
+      const responseImages = await fetchImages(query, page);
+      
+      if (!responseImages.hits.length) {
+        toast('Sorry, there are no images matching your request...', {
+          position: toast.POSITION.TOP_CENTER,
+          icon: '🤔',
+        });
+        return        
+      }
 
-          if (hits.length === 0) {            
-            toast('Sorry, there are no images matching your request...', {
-              position: toast.POSITION.TOP_CENTER,
-              icon: '🤔'
-            });           
-          }
+      const modifiedHits = responseImages.hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
+        id,
+        tags,
+        webformatURL,
+        largeImageURL,
+      }));
 
-          const modifiedHits = hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
-            id,
-            tags,
-            webformatURL,
-            largeImageURL
-          }));
-
-          setImages(prevImages => [...prevImages, ...modifiedHits]);
-          setPage(prevPage => prevPage + 1);
-          setIsLastPage(images.length + modifiedHits.length >= totalHits);
-        })
-     } catch (error) {
-    setError(error.message);
-  } finally {
-    setIsLoading(false);
+      setImages(prevImages => [...prevImages, ...modifiedHits]);      
+      setTotal(responseImages.total);      
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   }
-};
+}, [page, query]);
 
   const handleSearchSubmit = newQuery => {
     if (query === newQuery) {
       return;
     }
     setQuery(newQuery);
+    setImages([]);
+    setPage(1);
+    setTotal(1);
+    setIsLoading(false);    
+    setError(null);
   };
 
   const handleImageClick = image => {
@@ -88,6 +94,10 @@ const App = () => {
     document.body.style.overflow = 'auto';
   };
 
+    const loadMoreBtn = () => {
+    setPage(prevPage => prevPage + 1);
+  };
+
   return (
     <AppDiv>
       <ToastContainer transition={Flip} />
@@ -99,7 +109,7 @@ const App = () => {
 
       {isLoading && <Loader />}
 
-      {!isLoading && images.length > 0 && !isLastPage && <Button onClick={fetchImages} />}
+      {!isLoading && total / 12 > page && showButton && <Button onClick={loadMoreBtn} />}
 
       {showModal && <Modal image={selectedImage} onClose={handleModalClose} />}
     </AppDiv>

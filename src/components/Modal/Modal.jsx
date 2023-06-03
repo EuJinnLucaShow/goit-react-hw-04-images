@@ -4,12 +4,9 @@ import { Overlay, ModalDiv } from './Modal.styled'
 
 const Modal = ({ image, onClose }) => {
 useEffect(() => {
-const handleKeyDown = event => {
-if (event.code === 'Escape') {
-onClose();
-}
-  };
-  
+  const handleKeyDown = event => {
+    if (event.code === 'Escape') onClose();
+  }
   window.addEventListener('keydown', handleKeyDown);
 
 return () => {
