@@ -20,25 +20,9 @@ const App = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showButton, setShowButton] = useState(false);
 
-
-useEffect(() => {
- getImages();
-async function getImages() {
-      try {
-        setIsLoading(true);
-        const responseImages = await fetchImages('', 1);
-        setImages([...responseImages.hits]);
-        setTotal(responseImages.total);       
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  }, []);
-
   useEffect(() => {
-    if (query) getImages();
+    if (!query)
+        return;   
   async function getImages() {
     try {
       setShowButton(true);
@@ -68,6 +52,7 @@ async function getImages() {
       setIsLoading(false);
     }
   }
+    getImages();
 }, [page, query]);
 
   const handleSearchSubmit = newQuery => {
@@ -79,19 +64,17 @@ async function getImages() {
     setPage(1);
     setTotal(1);
     setIsLoading(false);    
-    setError(null);
+    setError(null);    
   };
 
   const handleImageClick = image => {
     setSelectedImage(image);
-    setShowModal(true);
-    document.body.style.overflow = 'hidden';
+    setShowModal(true);    
   };
 
   const handleModalClose = () => {
     setSelectedImage(null);
-    setShowModal(false);
-    document.body.style.overflow = 'auto';
+    setShowModal(false);    
   };
 
     const loadMoreBtn = () => {
