@@ -5,7 +5,7 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 import Modal from './Modal/Modal';
 import Loader from './Loader/Loader';
-import { AppDiv } from './App.styled';
+import { AppWrapper } from './App.styled';
 import { ToastContainer, toast, Flip } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -83,7 +83,7 @@ const App = () => {
   };
 
   return (
-    <AppDiv>
+    <AppWrapper>
       <ToastContainer transition={Flip} />
       <Searchbar onSubmit={handleSearchSubmit} />
 
@@ -98,7 +98,7 @@ const App = () => {
       )}
 
       {showModal && <Modal image={selectedImage} onClose={handleModalClose} />}
-    </AppDiv>
+    </AppWrapper>
   );
 };
 

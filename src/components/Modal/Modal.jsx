@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Overlay, ModalDiv } from './Modal.styled';
+import { Overlay, ModalWindow } from './Modal.styled';
 
 const Modal = ({ image, onClose }) => {
   useEffect(() => {
@@ -24,9 +24,9 @@ const Modal = ({ image, onClose }) => {
 
   return (
     <Overlay onClick={handleClick}>
-      <ModalDiv>
+      <ModalWindow>
         <img src={image.largeImageURL} alt={image.tags} />
-      </ModalDiv>
+      </ModalWindow>
     </Overlay>
   );
 };

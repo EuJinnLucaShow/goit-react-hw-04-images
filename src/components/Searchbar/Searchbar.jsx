@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   SearchBarHead,
@@ -8,50 +8,41 @@ import {
   SearchFormInput,
 } from './Searchbar.styled';
 
-class Searchbar extends Component {
-  state = {
-    query: '',
-  };
+const SearchBar = ({ onSubmit }) => {
+  const [query, setQuery] = useState('');
 
-  handleChange = event => {
-    this.setState({ query: event.target.value });
-  };
+  const handleChange = event => setQuery(event.target.value);
 
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
-    if (!this.state.query.trim()) {
+    if (!query.trim()) {
       return;
     }
-    this.props.onSubmit(this.state.query);
-    // this.setState({ query: '' });
+    onSubmit(query);
   };
 
-  render() {
-    // const { query } = this.state;
+  return (
+    <SearchBarHead>
+      <SearchForm onSubmit={handleSubmit}>
+        <SearchFormBtn type="submit">
+          <SearchFormButtonLabel>Search</SearchFormButtonLabel>
+        </SearchFormBtn>
 
-    return (
-      <SearchBarHead>
-        <SearchForm onSubmit={this.handleSubmit}>
-          <SearchFormBtn type="submit">
-            <SearchFormButtonLabel>Search</SearchFormButtonLabel>
-          </SearchFormBtn>
+        <SearchFormInput
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={query}
+          onChange={handleChange}
+        />
+      </SearchForm>
+    </SearchBarHead>
+  );
+};
 
-          <SearchFormInput
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={this.state.query}
-            onChange={this.handleChange}
-          />
-        </SearchForm>
-      </SearchBarHead>
-    );
-  }
-}
-
-Searchbar.propTypes = {
+SearchBar.propTypes = {
   onSubmit: PropTypes.func.isRequired,
 };
 
-export default Searchbar;
+export default SearchBar;
