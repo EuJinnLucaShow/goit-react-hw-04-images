@@ -15,45 +15,46 @@ const App = () => {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(1);  
+  const [total, setTotal] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
-    if (!query)
-        return;   
-  async function getImages() {
-    try {
-      setShowButton(true);
-      setIsLoading(true);
-      const responseImages = await fetchImages(query, page);
-      
-      if (!responseImages.hits.length) {
-        toast('Sorry, there are no images matching your request...', {
-          position: toast.POSITION.TOP_CENTER,
-          icon: '🤔',
-        });
-        return setQuery('')
+    if (!query) return;
+    async function getImages() {
+      try {
+        setShowButton(true);
+        setIsLoading(true);
+        const responseImages = await fetchImages(query, page);
+
+        if (!responseImages.hits.length) {
+          toast('Sorry, there are no images matching your request...', {
+            position: toast.POSITION.TOP_CENTER,
+            icon: '🤔',
+          });
+          return setQuery('');
+        }
+
+        const modifiedHits = responseImages.hits.map(
+          ({ id, tags, webformatURL, largeImageURL }) => ({
+            id,
+            tags,
+            webformatURL,
+            largeImageURL,
+          })
+        );
+
+        setImages(prevImages => [...prevImages, ...modifiedHits]);
+        setTotal(responseImages.total);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
-
-      const modifiedHits = responseImages.hits.map(({ id, tags, webformatURL, largeImageURL }) => ({
-        id,
-        tags,
-        webformatURL,
-        largeImageURL,
-      }));
-
-      setImages(prevImages => [...prevImages, ...modifiedHits]);      
-      setTotal(responseImages.total);      
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
     }
-  }
     getImages();
-}, [page, query]);
+  }, [page, query]);
 
   const handleSearchSubmit = newQuery => {
     if (query === newQuery) {
@@ -63,21 +64,21 @@ const App = () => {
     setImages([]);
     setPage(1);
     setTotal(1);
-    setIsLoading(false);    
-    setError(null);    
+    setIsLoading(false);
+    setError(null);
   };
 
   const handleImageClick = image => {
     setSelectedImage(image);
-    setShowModal(true);    
+    setShowModal(true);
   };
 
   const handleModalClose = () => {
     setSelectedImage(null);
-    setShowModal(false);    
+    setShowModal(false);
   };
 
-    const loadMoreBtn = () => {
+  const loadMoreBtn = () => {
     setPage(prevPage => prevPage + 1);
   };
 
@@ -92,7 +93,9 @@ const App = () => {
 
       {isLoading && <Loader />}
 
-      {!isLoading && total / 12 > page && showButton && <Button onClick={loadMoreBtn} />}
+      {!isLoading && total / 12 > page && showButton && (
+        <Button onClick={loadMoreBtn} />
+      )}
 
       {showModal && <Modal image={selectedImage} onClose={handleModalClose} />}
     </AppDiv>
