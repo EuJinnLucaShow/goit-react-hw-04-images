@@ -27,7 +27,6 @@ const SearchBar = ({ onSubmit }) => {
         <SearchFormBtn type="submit">
           <SearchFormButtonLabel>Search</SearchFormButtonLabel>
         </SearchFormBtn>
-
         <SearchFormInput
           type="text"
           autoComplete="off"
